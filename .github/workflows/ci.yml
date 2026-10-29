@@ -35,6 +35,7 @@ jobs:
             kubendhiran0803/argo-gitactions:${{ github.sha }}
 
   # CD: Bootstrap Argo CD in AWS EKS
+  
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -42,6 +43,32 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      # Temporary diagnostic step
+      - name: Check GitHub OIDC Claims
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os, json, base64, urllib.request
+
+          url = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
+          token = os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
+
+          request = urllib.request.Request(
+              url + ("&" if "?" in url else "?") + "audience=sts.amazonaws.com",
+              headers={"Authorization": "Bearer " + token}
+          )
+
+          with urllib.request.urlopen(request) as response:
+              jwt = json.load(response)["value"]
+
+          payload = jwt.split(".")[1]
+          payload += "=" * (-len(payload) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(payload))
+
+          for key in ("iss", "aud", "sub", "repository", "ref"):
+              print(f"{key}: {claims.get(key)}")
+          PY
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -55,24 +82,3 @@ jobs:
             --region ap-south-1 \
             --name test-eks
 
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-
-      - name: Install or Upgrade Argo CD
-        run: |
-          helm repo add argo https://argoproj.github.io/argo-helm
-          helm repo update
-
-          helm upgrade --install argocd argo/argo-cd \
-            --namespace argocd \
-            --create-namespace \
-            --wait \
-            --timeout 10m
-
-      - name: Deploy Argo CD Application
-        run: |
-          kubectl apply -f argocd-app.yaml
-
-      - name: Verify Argo CD Application
-        run: |
-          kubectl get applications -n argocd
