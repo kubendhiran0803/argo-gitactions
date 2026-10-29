@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: kubendhiran0803/argo-gitactions:8dccbb1e9f044e489784cc4018f0eaf5602cadd7
+          image: kubendhiran0803/argo-gitactions:b131efb83eb337258187d992dc969dce1b5dc5d8
           ports:
             - containerPort: 80
