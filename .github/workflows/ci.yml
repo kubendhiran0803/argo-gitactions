@@ -1,12 +1,17 @@
 
-name: Docker Build and Push
+name: Docker Build and Argo CD Deploy
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
+  # CI: Build and push image to Docker Hub
   build:
     runs-on: ubuntu-latest
 
@@ -28,3 +33,46 @@ jobs:
           tags: |
             kubendhiran0803/argo-gitactions:latest
             kubendhiran0803/argo-gitactions:${{ github.sha }}
+
+  # CD: Bootstrap Argo CD in AWS EKS
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-south-1
+
+      - name: Connect to EKS
+        run: |
+          aws eks update-kubeconfig \
+            --region ap-south-1 \
+            --name test-eks
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      - name: Install or Upgrade Argo CD
+        run: |
+          helm repo add argo https://argoproj.github.io/argo-helm
+          helm repo update
+
+          helm upgrade --install argocd argo/argo-cd \
+            --namespace argocd \
+            --create-namespace \
+            --wait \
+            --timeout 10m
+
+      - name: Deploy Argo CD Application
+        run: |
+          kubectl apply -f argocd-app.yaml
+
+      - name: Verify Argo CD Application
+        run: |
+          kubectl get applications -n argocd
