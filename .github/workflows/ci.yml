@@ -1,5 +1,5 @@
 
-name: Docker Build and Argo CD Deploy
+name: Build Application, Docker Image and Argo CD Deploy
 
 on:
   push:
@@ -14,26 +14,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout source code
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           persist-credentials: true
 
+      # Step 2: Build / validate static application
+      - name: Build Application
+        run: |
+          echo "Validating static website..."
+          test -s index.html
+          test -f style.css
+          test -f app.js
+          echo "Application validation completed"
+
+      # Step 3: Prepare Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Step 4: Build Docker image locally
+      - name: Build Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: |
+            kubendhiran0803/argo-gitactions:latest
+            kubendhiran0803/argo-gitactions:${{ github.sha }}
+
+      # Step 5: Login to Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and Push Docker Image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            kubendhiran0803/argo-gitactions:latest
-            kubendhiran0803/argo-gitactions:${{ github.sha }}
+      # Step 6: Push Docker image to Docker Hub
+      - name: Push Docker Image
+        run: |
+          docker push kubendhiran0803/argo-gitactions:latest
+          docker push kubendhiran0803/argo-gitactions:${{ github.sha }}
 
+      # Step 7: Update Kubernetes deployment image
       - name: Update Kubernetes Deployment Image
         run: |
           sed -i "s|image: kubendhiran0803/argo-gitactions:.*|image: kubendhiran0803/argo-gitactions:${{ github.sha }}|" k8s/deployment.yaml
