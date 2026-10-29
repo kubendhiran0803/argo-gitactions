@@ -7,17 +7,17 @@ on:
       - main
 
 permissions:
-  contents: read
-  id-token: write
+  contents: write
 
 jobs:
-  # CI: Build and push image to Docker Hub
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -34,51 +34,18 @@ jobs:
             kubendhiran0803/argo-gitactions:latest
             kubendhiran0803/argo-gitactions:${{ github.sha }}
 
-  # CD: Bootstrap Argo CD in AWS EKS
-  
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      # Temporary diagnostic step
-      - name: Check GitHub OIDC Claims
-        shell: bash
+      - name: Update Kubernetes Deployment Image
         run: |
-          python - <<'PY'
-          import os, json, base64, urllib.request
+          sed -i "s|image: kubendhiran0803/argo-gitactions:.*|image: kubendhiran0803/argo-gitactions:${{ github.sha }}|" k8s/deployment.yaml
 
-          url = os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]
-          token = os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          request = urllib.request.Request(
-              url + ("&" if "?" in url else "?") + "audience=sts.amazonaws.com",
-              headers={"Authorization": "Bearer " + token}
-          )
+          git add k8s/deployment.yaml
 
-          with urllib.request.urlopen(request) as response:
-              jwt = json.load(response)["value"]
-
-          payload = jwt.split(".")[1]
-          payload += "=" * (-len(payload) % 4)
-          claims = json.loads(base64.urlsafe_b64decode(payload))
-
-          for key in ("iss", "aud", "sub", "repository", "ref"):
-              print(f"{key}: {claims.get(key)}")
-          PY
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ap-south-1
-
-      - name: Connect to EKS
-        run: |
-          aws eks update-kubeconfig \
-            --region ap-south-1 \
-            --name test-eks
-
+          if git diff --cached --quiet; then
+            echo "No image changes to commit"
+          else
+            git commit -m "Update image to ${{ github.sha }}"
+            git push origin HEAD:main
+          fi
