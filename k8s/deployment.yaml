@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: argo-gitactions
-          image: kubendhiran0803/argo-gitactions:9ab6a63c93c4
+          image: kubendhiran0803/argo-gitactions:680f7d2ab14d
           ports:
             - containerPort: 80
