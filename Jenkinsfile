@@ -20,7 +20,6 @@ spec:
 
     options {
         disableConcurrentBuilds()
-        timestamps()
     }
 
     environment {
