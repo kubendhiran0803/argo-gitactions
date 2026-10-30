@@ -1,4 +1,3 @@
-
 pipeline {
     agent {
         kubernetes {
@@ -18,8 +17,13 @@ spec:
         }
     }
 
+    triggers {
+        pollSCM('* * * * *')
+    }
+
     options {
         disableConcurrentBuilds()
+        skipDefaultCheckout()
     }
 
     environment {
@@ -30,11 +34,39 @@ spec:
     stages {
         stage('Checkout GitHub') {
             steps {
-                checkout scm
+                checkout(scm: scm, poll: false)
+            }
+        }
+
+        stage('Check Commit') {
+            steps {
+                script {
+                    def commitMsg = sh(
+                        script: 'git log -1 --pretty=%B',
+                        returnStdout: true
+                    ).trim()
+                    def commitAuthor = sh(
+                        script: 'git log -1 --pretty=%an',
+                        returnStdout: true
+                    ).trim()
+
+                    echo "Last commit author: ${commitAuthor}"
+                    echo "Last commit message: ${commitMsg}"
+
+                    if (commitMsg.contains('[skip ci]') || commitAuthor == 'jenkins-ci') {
+                        echo "Commit was made by CI ([skip ci]). Skipping pipeline to prevent build loop."
+                        env.SKIP_BUILD = 'true'
+                    } else {
+                        env.SKIP_BUILD = 'false'
+                    }
+                }
             }
         }
 
         stage('Validate Application') {
+            when {
+                expression { env.SKIP_BUILD != 'true' }
+            }
             steps {
                 sh '''
                     set -eu
@@ -49,6 +81,9 @@ spec:
         }
 
         stage('Prepare Image Tag') {
+            when {
+                expression { env.SKIP_BUILD != 'true' }
+            }
             steps {
                 script {
                     env.IMAGE_TAG = sh(
@@ -62,6 +97,9 @@ spec:
         }
 
         stage('Build and Push Docker Image') {
+            when {
+                expression { env.SKIP_BUILD != 'true' }
+            }
             steps {
                 container('kaniko') {
                     withCredentials([
@@ -94,6 +132,9 @@ spec:
         }
 
         stage('Update Kubernetes Manifest') {
+            when {
+                expression { env.SKIP_BUILD != 'true' }
+            }
             steps {
                 withCredentials([
                     usernamePassword(
@@ -148,7 +189,13 @@ EOF
 
     post {
         success {
-            echo 'CI completed. Argo CD can now sync the new image.'
+            script {
+                if (env.SKIP_BUILD == 'true') {
+                    echo 'CI skipped because commit contains [skip ci].'
+                } else {
+                    echo 'CI completed. Argo CD can now sync the new image.'
+                }
+            }
         }
         failure {
             echo 'Pipeline failed. Check the console output.'
