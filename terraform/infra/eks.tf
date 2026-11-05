@@ -94,7 +94,7 @@ resource "aws_iam_role_policy_attachment" "node_group_registry" {
 # -----------------------------------------------------------------------------
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
-  node_group_name = "${var.cluster_name}-nodegroup"
+  node_group_name = "${var.cluster_name}-ng"
   node_role_arn   = aws_iam_role.node_group.arn
   subnet_ids      = data.terraform_remote_state.base.outputs.private_subnet_ids
 
