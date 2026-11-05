@@ -1,36 +1,18 @@
-name: "Terraform GitOps Pipeline"
+name: Terraform GitOps Pipeline
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "terraform/**"
   push:
     branches:
       - main
     paths:
       - "terraform/**"
+      - ".github/workflows/terraform.yaml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
   workflow_dispatch:
-    inputs:
-      layer:
-        description: "Terraform layer to target"
-        required: true
-        default: "all"
-        type: choice
-        options:
-          - "all"
-          - "base"
-          - "infra"
-      action:
-        description: "Action to run"
-        required: true
-        default: "apply"
-        type: choice
-        options:
-          - "apply"
-          - "plan"
-          - "destroy"
 
 permissions:
   id-token: write
@@ -44,10 +26,6 @@ env:
 jobs:
   terraform-base:
     name: "Terraform Base (Network)"
-    if: |
-      github.event_name != 'workflow_dispatch' ||
-      github.event.inputs.layer == 'base' ||
-      github.event.inputs.layer == 'all'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -76,24 +54,17 @@ jobs:
         run: terraform init -backend-config=backend-staging.hcl
 
       - name: Terraform Plan
-        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
+        if: github.event_name == 'pull_request'
         run: terraform plan -no-color
 
       - name: Terraform Apply
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
-
-      - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve
 
   terraform-infra:
     name: "Terraform Infra (Platform & ArgoCD)"
     needs: [terraform-base]
-    if: |
-      always() &&
-      (needs.terraform-base.result == 'success' || needs.terraform-base.result == 'skipped') &&
-      (github.event_name != 'workflow_dispatch' || github.event.inputs.layer == 'infra' || github.event.inputs.layer == 'all')
+    if: always() && (needs.terraform-base.result == 'success' || needs.terraform-base.result == 'skipped')
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -122,19 +93,19 @@ jobs:
         run: terraform init -backend-config=backend-staging.hcl
 
       - name: Terraform Plan
-        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
+        if: github.event_name == 'pull_request'
         run: terraform plan -no-color
 
       - name: Terraform Apply (Stages 2 & 3: EKS + ArgoCD)
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
 
       - name: Setup Kubectl
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: azure/setup-kubectl@v4
 
       - name: Bootstrap GitOps Root App (Stage 4)
-        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           echo "Configuring kubeconfig for EKS cluster..."
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-gitops-staging
@@ -145,8 +116,4 @@ jobs:
           echo "Applying Stage 4 GitOps Root App..."
           kubectl apply -f ../../gitops/root-app.yaml
           echo "ArgoCD Root App deployed! GitOps controller is now orchestrating the environment."
-
-      - name: Terraform Destroy
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
-        run: terraform destroy -auto-approve
 
