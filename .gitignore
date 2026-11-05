@@ -1,4 +1,42 @@
-password.txt
-password.b64
-jenkins-password.txt
-jenkins-password.b64
+# Local .terraform directories
+**/.terraform/*
+**/.terraform/
+.terraform/
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfplan.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude sensitive variables files
+*.tfvars
+*.tfvars.json
+!example.tfvars
+!terraform.tfvars.example
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Kubernetes and Helm artifacts
+kubeconfig*
+*.kubeconfig
+chart-archive/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Secrets and credentials
+*.pem
+*.key
+*.b64
+*password*
+credentials
+.env
+.env.*

@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://kubernetes-sigs.github.io/external-dns/
+    chart: external-dns
+    targetRevision: 1.14.5
+    helm:
+      parameters:
+        - name: serviceAccount.create
+          value: "true"
+        - name: serviceAccount.name
+          value: external-dns
+        - name: serviceAccount.annotations.eks\.amazonaws\.com/role-arn
+          value: "arn:aws:iam::715844024336:role/eks-gitops-staging-external-dns"
+        - name: provider.name
+          value: aws
+        - name: env[0].name
+          value: AWS_REGION
+        - name: env[0].value
+          value: ap-south-1
+        - name: policy
+          value: upsert-only
+        - name: txtOwnerId
+          value: eks-gitops-staging
+        - name: sources[0]
+          value: ingress
+        - name: sources[1]
+          value: service
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: external-dns
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

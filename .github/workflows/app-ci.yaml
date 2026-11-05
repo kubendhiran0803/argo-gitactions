@@ -1,0 +1,79 @@
+name: "Application CI/CD Pipeline"
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  AWS_REGION: "ap-south-1"
+  ECR_REPOSITORY: "eks-gitops-sample-app"
+
+jobs:
+  build-and-deploy:
+    name: "Build, Push & Update GitOps Tag"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure AWS Credentials (Access Key / Secret Key)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          echo "Building image ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}..."
+          docker build -t ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG} -t ${REGISTRY}/${ECR_REPOSITORY}:latest app/
+          
+          echo "Pushing images to ECR..."
+          docker push ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker push ${REGISTRY}/${ECR_REPOSITORY}:latest
+
+      - name: Update Image Tag in GitOps Manifest
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          MANIFEST_FILE="gitops/apps/sample-app/deployment.yaml"
+          echo "Updating ${MANIFEST_FILE} with new image ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}..."
+          
+          # Replace any image under container web with the new ECR tag
+          sed -i -E "s|image: .*|image: ${REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}|g" "${MANIFEST_FILE}"
+          
+          echo "Updated manifest snippet:"
+          grep "image:" "${MANIFEST_FILE}"
+
+      - name: Commit and Push Updated Manifest
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add gitops/apps/sample-app/deployment.yaml
+          
+          if git diff --staged --quiet; then
+            echo "No changes detected in GitOps deployment manifest."
+          else
+            git commit -m "chore(gitops): update sample-app image tag to ${{ github.sha }} [skip ci]"
+            git push origin main
+            echo "Successfully pushed updated GitOps manifest. ArgoCD will now auto-sync the new release!"
+          fi

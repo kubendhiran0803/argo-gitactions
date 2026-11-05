@@ -1,0 +1,61 @@
+# Staging overrides for ArgoCD
+
+# Direct argo-cd chart settings
+server:
+  extraArgs:
+    - --insecure
+  service:
+    type: ClusterIP
+    servicePortHttp: 80
+    servicePortHttps: 443
+
+configs:
+  params:
+    server.insecure: true
+  cm:
+    timeout.reconciliation: 180s
+    application.instanceLabelKey: argocd.argoproj.io/instance
+
+controller:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+repoServer:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+dex:
+  enabled: false
+
+notifications:
+  enabled: false
+
+# Also nested under argo-cd if deployed via wrapper dependency
+argo-cd:
+  server:
+    extraArgs:
+      - --insecure
+    service:
+      type: ClusterIP
+      servicePortHttp: 80
+      servicePortHttps: 443
+  configs:
+    params:
+      server.insecure: true
+    cm:
+      timeout.reconciliation: 180s
+      application.instanceLabelKey: argocd.argoproj.io/instance
+  dex:
+    enabled: false
+  notifications:
+    enabled: false

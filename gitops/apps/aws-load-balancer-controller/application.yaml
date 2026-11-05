@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: 1.8.2
+    helm:
+      parameters:
+        - name: clusterName
+          value: eks-gitops-staging
+        - name: serviceAccount.create
+          value: "true"
+        - name: serviceAccount.name
+          value: aws-load-balancer-controller
+        - name: serviceAccount.annotations.eks\.amazonaws\.com/role-arn
+          value: "arn:aws:iam::715844024336:role/eks-gitops-staging-aws-load-balancer-controller"
+        - name: region
+          value: ap-south-1
+        - name: vpcId
+          value: "" # Optional override; controller auto-detects from IMDS or subnets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

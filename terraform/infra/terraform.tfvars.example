@@ -1,0 +1,17 @@
+# Example tfvars for Stage 2 & 3
+# Copy this file to terraform.tfvars and populate with your own values:
+# cp terraform.tfvars.example terraform.tfvars
+
+aws_region          = "ap-south-1"
+environment         = "staging"
+project_name        = "eks-gitops"
+cluster_name        = "eks-gitops-staging"
+cluster_version     = "1.30"
+domain_name         = "example.com" # Replace with your real Route 53 domain
+base_state_bucket   = "eks-gitops-tfstate-715844024336"
+base_state_key      = "base/staging/terraform.tfstate"
+node_instance_types = ["t3.medium"]
+desired_nodes       = 2
+min_nodes           = 2
+max_nodes           = 3
+ecr_repository_name = "eks-gitops-sample-app"
