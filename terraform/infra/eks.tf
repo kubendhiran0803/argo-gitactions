@@ -105,6 +105,7 @@ resource "aws_eks_node_group" "this" {
   }
 
   instance_types = var.node_instance_types
+  ami_type       = "AL2023_x86_64_STANDARD"
   capacity_type  = "ON_DEMAND"
 
   update_config {
@@ -125,24 +126,5 @@ resource "aws_iam_openid_connect_provider" "this" {
   client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
   url             = aws_eks_cluster.this.identity[0].oidc[0].issuer
-}
-
-# -----------------------------------------------------------------------------
-# Admin Access Entry for Current IAM Caller
-# -----------------------------------------------------------------------------
-resource "aws_eks_access_entry" "admin" {
-  cluster_name  = aws_eks_cluster.this.name
-  principal_arn = data.aws_caller_identity.current.arn
-  type          = "STANDARD"
-}
-
-resource "aws_eks_access_policy_association" "admin" {
-  cluster_name  = aws_eks_cluster.this.name
-  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-  principal_arn = data.aws_caller_identity.current.arn
-
-  access_scope {
-    type = "cluster"
-  }
 }
 

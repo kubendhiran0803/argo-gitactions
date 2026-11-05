@@ -66,3 +66,4 @@ Write-Host "ArgoCD is now watching your repository and syncing:"
 Write-Host "  1. AWS Load Balancer Controller"
 Write-Host "  2. ExternalDNS"
 Write-Host "  3. Sample Application (Aura Focus App)"
+

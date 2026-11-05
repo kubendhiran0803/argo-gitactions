@@ -20,17 +20,17 @@ output "ecr_repository_url" {
 
 output "route53_zone_id" {
   description = "The Hosted Zone ID in Route 53"
-  value       = module.route53.zone_id
+  value       = var.enable_custom_domain ? module.route53[0].zone_id : null
 }
 
 output "route53_nameservers" {
   description = "The 4 Route53 nameservers to copy into your domain registrar"
-  value       = module.route53.name_servers
+  value       = var.enable_custom_domain ? module.route53[0].name_servers : null
 }
 
 output "acm_certificate_arn" {
   description = "The ARN of the validated ACM Certificate"
-  value       = aws_acm_certificate.this.arn
+  value       = var.enable_custom_domain ? aws_acm_certificate.this[0].arn : null
 }
 
 output "load_balancer_controller_role_arn" {

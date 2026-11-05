@@ -28,10 +28,16 @@ variable "cluster_version" {
   default     = "1.30"
 }
 
+variable "enable_custom_domain" {
+  description = "Enable Route53 Hosted Zone and ACM Certificate (set to true once you have a real registered domain)"
+  type        = bool
+  default     = false
+}
+
 variable "domain_name" {
-  description = "Registered domain name for Route53 and ACM (e.g., example.com)"
+  description = "Registered domain name for Route53 and ACM"
   type        = string
-  default     = "example.com"
+  default     = "kub-gitops.net"
 }
 
 variable "base_state_bucket" {

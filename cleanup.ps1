@@ -30,3 +30,4 @@ Set-Location -Path "../.."
 Write-Host "`n==========================================================" -ForegroundColor Green
 Write-Host "✅ CLEAN-UP COMPLETED. All AWS resources safely destroyed." -ForegroundColor Green
 Write-Host "==========================================================" -ForegroundColor Green
+
