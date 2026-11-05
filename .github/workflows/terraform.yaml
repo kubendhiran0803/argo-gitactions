@@ -1,18 +1,12 @@
 name: Terraform GitOps Pipeline
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "terraform/**"
-      - ".github/workflows/terraform.yaml"
+  workflow_dispatch:
   pull_request:
     branches:
       - main
     paths:
       - "terraform/**"
-  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -58,7 +52,7 @@ jobs:
         run: terraform plan -no-color
 
       - name: Terraform Apply
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
 
   terraform-infra:
@@ -97,15 +91,15 @@ jobs:
         run: terraform plan -no-color
 
       - name: "Terraform Apply (Stages 2 and 3: EKS and ArgoCD)"
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
 
       - name: Setup Kubectl
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         uses: azure/setup-kubectl@v4
 
       - name: Bootstrap GitOps Root App (Stage 4)
-        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch'
         run: |
           echo "Configuring kubeconfig for EKS cluster..."
           aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-gitops-staging
