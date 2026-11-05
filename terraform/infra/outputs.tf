@@ -52,3 +52,4 @@ output "argocd_admin_password_command" {
   description = "Command to retrieve the initial ArgoCD admin password"
   value       = "kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath=\"{.data.password}\" | [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($input))"
 }
+

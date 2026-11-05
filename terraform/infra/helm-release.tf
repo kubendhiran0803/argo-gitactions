@@ -15,3 +15,4 @@ resource "helm_release" "argocd" {
     aws_eks_node_group.this
   ]
 }
+

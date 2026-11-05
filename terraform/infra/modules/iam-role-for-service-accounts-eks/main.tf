@@ -49,3 +49,4 @@ resource "aws_iam_role_policy_attachment" "managed" {
   role       = aws_iam_role.this.name
   policy_arn = var.managed_policy_arns[count.index]
 }
+

@@ -3,3 +3,4 @@ resource "aws_route53_zone" "this" {
   comment = var.comment
   tags    = var.tags
 }
+

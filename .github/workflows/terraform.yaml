@@ -16,20 +16,20 @@ on:
       layer:
         description: "Terraform layer to target"
         required: true
-        default: "infra"
+        default: "all"
         type: choice
         options:
+          - "all"
           - "base"
           - "infra"
-          - "all"
       action:
         description: "Action to run"
         required: true
-        default: "plan"
+        default: "apply"
         type: choice
         options:
-          - "plan"
           - "apply"
+          - "plan"
           - "destroy"
 
 permissions:
@@ -125,10 +125,28 @@ jobs:
         if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan')
         run: terraform plan -no-color
 
-      - name: Terraform Apply
+      - name: Terraform Apply (Stages 2 & 3: EKS + ArgoCD)
         if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
         run: terraform apply -auto-approve
+
+      - name: Setup Kubectl
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        uses: azure/setup-kubectl@v4
+
+      - name: Bootstrap GitOps Root App (Stage 4)
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        run: |
+          echo "Configuring kubeconfig for EKS cluster..."
+          aws eks update-kubeconfig --region ${{ env.AWS_REGION }} --name eks-gitops-staging
+          
+          echo "Waiting for ArgoCD API server to be available..."
+          kubectl wait --for=condition=available deployment/argocd-server -n argocd --timeout=300s || true
+          
+          echo "Applying Stage 4 GitOps Root App..."
+          kubectl apply -f ../../gitops/root-app.yaml
+          echo "ArgoCD Root App deployed! GitOps controller is now orchestrating the environment."
 
       - name: Terraform Destroy
         if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
         run: terraform destroy -auto-approve
+

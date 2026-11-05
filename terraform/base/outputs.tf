@@ -32,3 +32,4 @@ output "aws_region" {
   description = "AWS region used for base resources"
   value       = var.aws_region
 }
+

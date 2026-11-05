@@ -8,3 +8,4 @@ locals {
     ManagedBy   = "Terraform"
   }
 }
+

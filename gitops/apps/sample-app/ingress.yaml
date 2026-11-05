@@ -28,3 +28,4 @@ spec:
                 name: sample-app
                 port:
                   number: 80
+

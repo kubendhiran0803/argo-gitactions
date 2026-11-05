@@ -12,3 +12,4 @@ output "domain_name" {
   description = "The registered domain name"
   value       = aws_route53_zone.this.name
 }
+

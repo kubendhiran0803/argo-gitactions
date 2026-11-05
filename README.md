@@ -396,3 +396,4 @@ aws s3 rb s3://eks-gitops-tfstate-715844024336 --force
 | **GitHub Actions Auth** | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` in GitHub Secrets |
 | **Pod IAM Roles** | AWS IAM Roles for Service Accounts (IRSA) via OIDC Federation |
 | **Secrets in Git** | Strictly excluded via `.gitignore` (`.tfstate`, `.tfvars`, credentials) |
+

@@ -18,3 +18,4 @@ module "security_group" {
   environment = var.environment
   tags        = local.common_tags
 }
+

@@ -17,3 +17,4 @@ output "aws_load_balancer_controller_policy_json" {
   description = "Standard AWS Load Balancer Controller IAM policy document JSON"
   value       = data.aws_iam_policy_document.aws_load_balancer_controller.json
 }
+

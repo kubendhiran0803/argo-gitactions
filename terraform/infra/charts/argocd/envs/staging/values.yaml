@@ -59,3 +59,4 @@ argo-cd:
     enabled: false
   notifications:
     enabled: false
+

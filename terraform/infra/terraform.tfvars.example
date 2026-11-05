@@ -15,3 +15,4 @@ desired_nodes       = 2
 min_nodes           = 2
 max_nodes           = 3
 ecr_repository_name = "eks-gitops-sample-app"
+

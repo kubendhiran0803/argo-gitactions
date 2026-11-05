@@ -77,3 +77,4 @@ jobs:
             git push origin main
             echo "Successfully pushed updated GitOps manifest. ArgoCD will now auto-sync the new release!"
           fi
+

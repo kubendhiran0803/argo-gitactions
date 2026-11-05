@@ -1,3 +1,4 @@
 # Default values for argo-cd dependency
 argo-cd:
   global: {}
+
