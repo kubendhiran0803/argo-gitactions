@@ -179,7 +179,9 @@ data "aws_iam_policy_document" "aws_load_balancer_controller" {
     ]
     resources = [
       "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
-      "arn:aws:elasticloadbalancing:*:*:loadbalancer/*/*"
+      "arn:aws:elasticloadbalancing:*:*:loadbalancer/*/*",
+      "arn:aws:elasticloadbalancing:*:*:listener/*/*",
+      "arn:aws:elasticloadbalancing:*:*:listener-rule/*/*"
     ]
   }
 
