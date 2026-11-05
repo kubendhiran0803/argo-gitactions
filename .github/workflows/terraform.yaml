@@ -96,7 +96,7 @@ jobs:
         if: github.event_name == 'pull_request'
         run: terraform plan -no-color
 
-      - name: Terraform Apply (Stages 2 & 3: EKS + ArgoCD)
+      - name: "Terraform Apply (Stages 2 and 3: EKS and ArgoCD)"
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: terraform apply -auto-approve
 
