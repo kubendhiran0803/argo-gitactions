@@ -9,17 +9,11 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: '443'
-    # ExternalDNS reads this hostname to create the Route53 A record automatically:
-    external-dns.alpha.kubernetes.io/hostname: app.example.com
-    # Optional ACM ARN override if needed (ALB controller can also auto-discover via host name match):
-    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:715844024336:certificate/<id>
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
 spec:
   ingressClassName: alb
   rules:
-    - host: app.example.com # Replace example.com with your registered domain
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
