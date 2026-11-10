@@ -330,6 +330,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Asynchronously notify backend microservice for OpenTelemetry trace capture
+    fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
+    }).catch(() => {});
+
     if (validateCredentials(user, pass)) {
       // Clear errors
       if (loginError) loginError.style.display = 'none';
@@ -405,6 +412,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function igniteCracker() {
     if (APP_STATE.isCrackerExploded) return;
     if (crackerTrigger.classList.contains('is-burning')) return;
+
+    // Asynchronously trigger backend microservice cracker & greeting traces
+    fetch('/api/cracker/burst', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: APP_STATE.currentUser, type: 'diwali-bomb' })
+    }).catch(() => {});
+
+    fetch('/api/greeting?username=' + encodeURIComponent(APP_STATE.currentUser)).catch(() => {});
 
     // 1. Start burning fuse & play sizzle sound
     crackerTrigger.classList.add('is-burning');
