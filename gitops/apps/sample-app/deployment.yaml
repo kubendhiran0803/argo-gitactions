@@ -20,7 +20,7 @@ spec:
         - name: web
           # Stage 4 starts with nginx:alpine.
           # Stage 6 CI automatically updates this tag to: 715844024336.dkr.ecr.ap-south-1.amazonaws.com/eks-gitops-sample-app:<SHA>
-          image: 715844024336.dkr.ecr.ap-south-1.amazonaws.com/eks-gitops-sample-app:v2-tracing
+          image: 715844024336.dkr.ecr.ap-south-1.amazonaws.com/eks-gitops-sample-app:f0b3ff31bcf822f4c825287fb509272059d53502
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
