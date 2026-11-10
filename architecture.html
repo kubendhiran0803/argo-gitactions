@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AWS EKS End-to-End Architecture Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;600;700;800&display=swap');
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0b0f19;
+    color: #f1f5f9;
+    font-family: 'Inter', -apple-system, sans-serif;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .canvas {
+    width: 1200px;
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 20px;
+    padding: 32px 36px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.8);
+  }
+  .title-header {
+    text-align: center;
+    margin-bottom: 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding-bottom: 18px;
+  }
+  .title-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 0%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .title-header p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 5px;
+  }
+  .box {
+    border-radius: 12px;
+    padding: 12px 16px;
+    position: relative;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .box-title {
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .box-sub {
+    font-size: 12px;
+    color: #cbd5e1;
+    line-height: 1.5;
+  }
+  .arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 26px;
+    position: relative;
+  }
+  .arrow::before {
+    content: '';
+    width: 2px;
+    height: 100%;
+    background: #0ea5e9;
+  }
+  .arrow::after {
+    content: '▼';
+    position: absolute;
+    bottom: -4px;
+    font-size: 10px;
+    color: #0ea5e9;
+  }
+  .user-box {
+    background: rgba(30, 41, 59, 0.85);
+    border: 1.5px solid #38bdf8;
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.15);
+  }
+  .dns-box {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1.5px solid #818cf8;
+  }
+  .region-wrapper {
+    background: rgba(15, 23, 42, 0.6);
+    border: 2px dashed #f59e0b;
+    border-radius: 16px;
+    padding: 18px;
+    margin-top: 2px;
+  }
+  .region-badge {
+    display: inline-block;
+    background: #f59e0b;
+    color: #000;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .vpc-wrapper {
+    background: rgba(17, 24, 39, 0.9);
+    border: 1.5px solid #f97316;
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .vpc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .vpc-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fb923c;
+  }
+  .igw-badge {
+    background: #f97316;
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+  .subnet-wrapper {
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .public-subnet {
+    background: rgba(16, 185, 129, 0.05);
+    border: 1.5px solid #10b981;
+  }
+  .private-subnet {
+    background: rgba(99, 102, 241, 0.05);
+    border: 1.5px solid #6366f1;
+    margin-bottom: 0;
+  }
+  .subnet-tag {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .public-tag { color: #34d399; }
+  .private-tag { color: #818cf8; }
+  .sec-check {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 11px;
+    color: #fde68a;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .alb-box {
+    background: #0f172a;
+    border: 1.5px solid #38bdf8;
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .node-wrapper {
+    background: #0f172a;
+    border: 1.5px solid #a855f7;
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .node-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #c084fc;
+    margin-bottom: 6px;
+  }
+  .cni-box {
+    background: rgba(168, 85, 247, 0.1);
+    border: 1px dashed #a855f7;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #e9d5ff;
+    margin-bottom: 8px;
+  }
+  .pod-box {
+    background: rgba(14, 165, 233, 0.08);
+    border: 1.5px solid #0284c7;
+    border-radius: 8px;
+    padding: 10px;
+  }
+  .pod-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #38bdf8;
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nginx-badge {
+    background: #0284c7;
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .highlight {
+    color: #38bdf8;
+    font-weight: 700;
+  }
+  .code {
+    background: rgba(0,0,0,0.4);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="title-header">
+    <h1>End-to-End User Request &amp; Traffic Flow Architecture</h1>
+    <p>Amazon EKS (v1.30) &bull; GitOps ArgoCD &bull; AWS Application Load Balancer &bull; Diwali Microservice</p>
+  </div>
+
+  <!-- 1. Browser -->
+  <div class="box user-box">
+    <div class="box-title"><span>💻</span> 1. USER'S BROWSER (Laptop, Friend's Laptop, or Mobile Phone)</div>
+    <div class="box-sub">
+      URL Typed: <span class="code highlight">http://k8s-sampleap-sampleap-1ac8b54bc9-129106128.ap-south-1.elb.amazonaws.com</span><br>
+      Browser automatically initiates HTTP connection on default destination <strong>Port 80</strong>
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- 2. DNS -->
+  <div class="box dns-box">
+    <div class="box-title"><span>🌐</span> 2. GLOBAL PUBLIC DNS (Amazon Route 53 / Local ISP Resolver)</div>
+    <div class="box-sub">
+      Resolves the 70-char AWS ALB domain name into public Elastic Load Balancer IPs: 
+      <span class="code highlight">13.205.14.68</span> and <span class="code highlight">3.7.208.166</span>
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- 3. AWS Region -->
+  <div class="region-wrapper">
+    <div class="region-badge">3. AWS Cloud Region: ap-south-1 (Mumbai)</div>
+
+    <!-- 4. VPC -->
+    <div class="vpc-wrapper">
+      <div class="vpc-header">
+        <span class="vpc-title">4. ISOLATED CLOUD NETWORK (VPC: 10.0.0.0/16 - eks-gitops-vpc)</span>
+        <span class="igw-badge">Internet Gateway (IGW) Attached</span>
+      </div>
+
+      <!-- 5. Public Subnet -->
+      <div class="subnet-wrapper public-subnet">
+        <div class="subnet-tag public-tag">
+          <span>5. PUBLIC SUBNET (CIDR: 10.0.1.0/24)</span>
+          <span>Internet Facing Routing Table</span>
+        </div>
+
+        <div class="sec-check">
+          <span>🔒</span>
+          <span><strong>Security Group Check #1 (ALB SG):</strong> TCP Port 80 open to <code>0.0.0.0/0</code>? &rarr; <strong style="color:#4ade80;">ALLOWED ✅</strong></span>
+        </div>
+
+        <div class="alb-box">
+          <div class="box-title" style="color:#38bdf8;"><span>⚖️</span> AWS Application Load Balancer (ALB) — Layer 7 Routing</div>
+          <div class="box-sub">
+            &bull; Receives HTTP traffic on <span class="code">13.205.14.68:80</span><br>
+            &bull; Matches Ingress Rule Path: <span class="code">Prefix /</span><br>
+            &bull; Target Group Lookup (Target Type: IP) &rarr; Routes to healthy Pod IP: <span class="code highlight">10.0.10.216:80</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="arrow"></div>
+
+      <!-- 6. Private Subnet -->
+      <div class="subnet-wrapper private-subnet">
+        <div class="subnet-tag private-tag">
+          <span>6. PRIVATE SUBNET (CIDR: 10.0.10.0/24)</span>
+          <span>Secure Subnet (Zero Direct Public Access)</span>
+        </div>
+
+        <div class="sec-check">
+          <span>🔒</span>
+          <span><strong>Security Group Check #2 (EKS Node SG):</strong> Inbound traffic from ALB SG permitted? &rarr; <strong style="color:#4ade80;">ALLOWED ✅</strong></span>
+        </div>
+
+        <!-- 7. Node -->
+        <div class="node-wrapper">
+          <div class="node-title">7. AMAZON EKS MANAGED WORKER NODE (EC2 Instance: t3.small)</div>
+          
+          <div class="cni-box">
+            <strong>AWS VPC CNI Plugin:</strong> Manages real secondary VPC ENI IPs. Directs packet directly into container network interface.
+          </div>
+
+          <!-- 8. Pod -->
+          <div class="pod-box">
+            <div class="pod-title">
+              <span>8. DIWALI APPLICATION POD (Namespace: sample-app)</span>
+              <span class="nginx-badge">Nginx Alpine</span>
+            </div>
+            <div class="box-sub">
+              &bull; Internal Pod IP: <span class="code highlight">10.0.10.216:80</span><br>
+              &bull; Container Process: <span class="code">nginx -g 'daemon off;'</span><br>
+              &bull; Reads static files from document root: <span class="code">/usr/share/nginx/html</span> (index.html, style.css, app.js)<br>
+              &bull; Returns response: <strong style="color:#4ade80;">HTTP 200 OK</strong> back to client browser!
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
+
