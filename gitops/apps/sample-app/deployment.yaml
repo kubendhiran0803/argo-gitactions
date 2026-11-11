@@ -28,7 +28,7 @@ spec:
               protocol: TCP
           env:                                  # <-- add here
             - name: OTEL_SERVICE_NAME
-              value: "my-app"
+              value: "diwali-festive-microservice"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://tempo.monitoring.svc.cluster.local:4318"
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
