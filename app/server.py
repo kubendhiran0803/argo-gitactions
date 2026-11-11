@@ -194,6 +194,16 @@ def proxy_browser_traces():
 def healthz():
     return "OK", 200
 
+@app.errorhandler(404)
+def handle_404(e):
+    with tracer.start_as_current_span("http.not_found") as span:
+        span.set_attribute("http.status_code", 404)
+        span.set_attribute("http.target", request.path)
+        span.set_attribute("http.method", request.method)
+        span.set_attribute("http.client_ip", request.remote_addr)
+        span.set_status(Status(StatusCode.ERROR, f"404 Not Found: {request.path}"))
+        return e.get_response()
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
 
