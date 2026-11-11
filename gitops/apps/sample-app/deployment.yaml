@@ -25,12 +25,12 @@ spec:
           ports:
             - name: http
               containerPort: 80
-              protocol: TCP
+              protocol: TCP 
           env:                                  # <-- add here
             - name: OTEL_SERVICE_NAME
               value: "diwali-festive-microservice"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://tempo.monitoring.svc.cluster.local:4318"
+              value: "http://otel-collector.monitoring.svc.cluster.local:4318"
             - name: OTEL_EXPORTER_OTLP_PROTOCOL
               value: "http/protobuf"
             - name: OTEL_METRICS_EXPORTER
