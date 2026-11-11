@@ -249,7 +249,7 @@ class FireworksEngine {
 // 3. Application State & Tricky Password Logic
 // =============================================================================
 const APP_STATE = {
-  currentUser: 'kubendhiran',
+  currentUser: 'Guest',
   isAuthenticated: false,
   isCrackerExploded: false
 };
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle Login
   function handleLogin() {
     const rawUser = usernameInput ? usernameInput.value.trim() : '';
-    const user = rawUser || 'kubendhiran';
+    const user = rawUser || 'Guest';
     const pass = passwordInput ? passwordInput.value.trim() : '';
 
     if (!pass) {

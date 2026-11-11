@@ -104,10 +104,10 @@ class GreetingService:
     def get_greeting(username):
         with tracer.start_as_current_span("greeting_service.get_greeting") as span:
             span.set_attribute("service.name", "greeting-service")
-            span.set_attribute("greeting.recipient", username or "Kubendhiran")
+            span.set_attribute("greeting.recipient", username or "Guest")
             
             with tracer.start_as_current_span("greeting.compose_blessing") as comp_span:
-                display_name = (username or "Kubendhiran").strip().title()
+                display_name = (username or "Guest").strip().title()
                 headline = f"Happy Diwali, {display_name}!"
                 blessing = "May the supreme light of Deepavali eradicate all darkness, illuminating your journey with boundless joy, vibrant health, prosperity, and triumphant career success!"
                 comp_span.set_attribute("greeting.headline", headline)
@@ -147,7 +147,7 @@ def serve_static(path):
 def api_login():
     with tracer.start_as_current_span("api.login_handler") as span:
         data = request.get_json(silent=True) or {}
-        username = data.get("username", "kubendhiran")
+        username = data.get("username", "Guest")
         password = data.get("password", "")
         span.set_attribute("http.client_ip", request.remote_addr)
         
@@ -160,7 +160,7 @@ def api_login():
 def api_cracker():
     with tracer.start_as_current_span("api.cracker_handler") as span:
         data = request.get_json(silent=True) or {}
-        username = data.get("username", "kubendhiran")
+        username = data.get("username", "Guest")
         cracker_type = data.get("type", "diwali-bomb")
         span.set_attribute("user.username", username)
         
@@ -170,7 +170,7 @@ def api_cracker():
 @app.route("/api/greeting", methods=["GET"])
 def api_greeting():
     with tracer.start_as_current_span("api.greeting_handler") as span:
-        username = request.args.get("username", "kubendhiran")
+        username = request.args.get("username", "Guest")
         span.set_attribute("user.username", username)
         
         result = GreetingService.get_greeting(username)

@@ -2,17 +2,174 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=app/src/index.html">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🪔 Shubh Deepavali — Microservice Portal</title>
-  <script>
-    window.location.replace("app/src/index.html");
-  </script>
+  <meta name="description" content="A cloud-native festive Diwali celebration microservice featuring interactive firecracker ignition, sound synthesis, and personalized greetings.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<body style="background:#0d0614;color:#fce7f3;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
-  <div style="text-align:center;">
-    <h1>🪔 Shubh Deepavali Portal</h1>
-    <p>Opening Festive Application... <a href="app/src/index.html" style="color:#f59e0b;">Click here if not redirected</a></p>
-  </div>
+<body>
+  <!-- Ambient Deepavali Glow Elements -->
+  <div class="ambient-glow glow-gold"></div>
+  <div class="ambient-glow glow-crimson"></div>
+  <div class="ambient-glow glow-violet"></div>
+
+  <!-- Canvas for dynamic fireworks particle engine -->
+  <canvas id="fireworks-canvas"></canvas>
+
+  <!-- Main Container -->
+  <main class="app-wrapper">
+
+    <!-- ===================================================================== -->
+    <!-- 1. LOGIN SECTION -->
+    <!-- ===================================================================== -->
+    <section class="card login-card" id="login-section">
+      <div class="card-header">
+        <div class="diya-badge">
+          <span class="diya-flame"></span>
+          <span class="diya-base">🪔</span>
+        </div>
+        <h1 class="brand-title">Shubh Deepavali</h1>
+        <p class="brand-subtitle">Cloud-Native Festive Microservice</p>
+      </div>
+
+      <form id="login-form" class="auth-form" autocomplete="off" onsubmit="return false;">
+        <div class="form-group">
+          <label for="username">Your Name</label>
+          <div class="input-container">
+            <span class="input-icon">👤</span>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              value="" 
+              placeholder="Enter your name (e.g. Alex, Rahul, Priya)" 
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Security Password</label>
+          <div class="input-container">
+            <span class="input-icon">🔑</span>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              placeholder="Enter password (or master key: 111009)" 
+              required
+            />
+            <button type="button" id="toggle-password" class="toggle-pwd-btn" aria-label="Toggle password visibility">👁️</button>
+          </div>
+          <div class="hint-box">
+            <span class="hint-icon">💡</span>
+            <span class="hint-text"><strong>Password Rule:</strong> Count the letters in your name, then enter the countdown of the last 3 numbers (e.g., for 5 letters &rarr; <strong>050403</strong>), or use the master key: <strong>111009</strong>!</span>
+          </div>
+        </div>
+
+        <div id="login-error" class="error-banner" style="display: none;"></div>
+
+        <button type="submit" id="login-btn" class="btn btn-primary">
+          <span>Enter Diwali Celebration</span>
+          <span class="btn-arrow">✨</span>
+        </button>
+      </form>
+
+      <div class="system-meta-footer">
+        <span class="status-indicator"></span>
+        <span>Service: <code>diwali-frontend:v1.0</code> | Port: <code>80 (Nginx)</code></span>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 2. CELEBRATION DASHBOARD SECTION (Shown after successful login) -->
+    <!-- ===================================================================== -->
+    <section class="card celebration-card" id="celebration-section" style="display: none;">
+      <!-- Dashboard Top Bar -->
+      <div class="dashboard-bar">
+        <div class="user-greeting-pill">
+          <span class="status-dot"></span>
+          <span>Logged in as: <strong id="display-user">Friend</strong></span>
+        </div>
+        <button type="button" id="logout-btn" class="btn btn-outline-sm">
+          <span>Sign Out</span> 🚪
+        </button>
+      </div>
+
+      <!-- Main Visual Diya Array -->
+      <div class="festive-lamps-row">
+        <div class="diya-lamp"><span class="flame"></span>🪔</div>
+        <div class="diya-lamp main-lamp"><span class="flame big-flame"></span>🪔</div>
+        <div class="diya-lamp"><span class="flame"></span>🪔</div>
+      </div>
+
+      <div class="celebration-header">
+        <h2 class="festive-title">Festival of Lights</h2>
+        <p class="festive-description">Ignite the auspicious cracker below to reveal your personalized Diwali blessing!</p>
+      </div>
+
+      <!-- Interactive Cracker Area -->
+      <div class="cracker-station" id="cracker-station">
+        <div class="cracker-container" id="cracker-trigger" role="button" tabindex="0" title="Click to Burst the Cracker!">
+          <div class="spark-fuse" id="spark-fuse">
+            <div class="fuse-line"></div>
+            <div class="fuse-spark"></div>
+          </div>
+          <div class="cracker-visual">
+            <div class="cracker-cylinder">
+              <span class="cylinder-band red"></span>
+              <span class="cylinder-band gold">💥</span>
+              <span class="cylinder-band green"></span>
+            </div>
+            <div class="cracker-burst-ring"></div>
+          </div>
+          <div class="click-pulse-cta">
+            <span class="pulse-icon">🧨</span>
+            <span class="pulse-text">CLICK TO CRACK!</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revealing Diwali Message (Appears when cracked) -->
+      <div class="revealed-greeting-box" id="revealed-greeting-box" style="display: none;">
+        <div class="sparkle-stars">✨ 🌟 🎆 🌟 ✨</div>
+        <h1 class="diwali-headline" id="diwali-headline">Happy Diwali!</h1>
+        <p class="diwali-sub-blessing">
+          May the supreme light of Deepavali eradicate all darkness, illuminating your journey with boundless joy, vibrant health, prosperity, and triumphant career success!
+        </p>
+        <div class="greeting-actions">
+          <button type="button" id="burst-again-btn" class="btn btn-burst">
+            <span>🎆 Crack Another One!</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cloud Microservice Telemetry Badge for Mentor Demo -->
+      <div class="telemetry-panel">
+        <div class="telemetry-item">
+          <span class="t-label">Architecture</span>
+          <span class="t-val">Microservice (Docker + Nginx)</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="t-label">Orchestration</span>
+          <span class="t-val">Amazon EKS (v1.30)</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="t-label">GitOps Continuous Delivery</span>
+          <span class="t-val">ArgoCD (App-of-Apps)</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="t-label">Load Balancer</span>
+          <span class="t-val">AWS Application Load Balancer</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+  <script src="tracing.js"></script>
 </body>
 </html>
-

@@ -37,15 +37,15 @@
 
       <form id="login-form" class="auth-form" autocomplete="off" onsubmit="return false;">
         <div class="form-group">
-          <label for="username">User Name (Default: kubendhiran)</label>
+          <label for="username">Your Name</label>
           <div class="input-container">
             <span class="input-icon">👤</span>
             <input 
               type="text" 
               id="username" 
               name="username" 
-              value="kubendhiran" 
-              placeholder="Enter your name (Default: kubendhiran)" 
+              value="" 
+              placeholder="Enter your name (e.g. Alex, Rahul, Priya)" 
             />
           </div>
         </div>
@@ -58,14 +58,14 @@
               type="password" 
               id="password" 
               name="password" 
-              placeholder="Enter password (e.g. 111009)" 
+              placeholder="Enter password (or master key: 111009)" 
               required
             />
             <button type="button" id="toggle-password" class="toggle-pwd-btn" aria-label="Toggle password visibility">👁️</button>
           </div>
           <div class="hint-box">
             <span class="hint-icon">💡</span>
-            <span class="hint-text"><strong>Tricky Password Rule:</strong> Based on letters count. For <strong>kubendhiran</strong> (11 letters), take the last 3 numbers countdown: 11, 10, 09 &rarr; <strong>111009</strong>!</span>
+            <span class="hint-text"><strong>Password Rule:</strong> Count the letters in your name, then enter the countdown of the last 3 numbers (e.g., for 5 letters &rarr; <strong>050403</strong>), or use the master key: <strong>111009</strong>!</span>
           </div>
         </div>
 
@@ -91,7 +91,7 @@
       <div class="dashboard-bar">
         <div class="user-greeting-pill">
           <span class="status-dot"></span>
-          <span>Logged in as: <strong id="display-user">kubendhiran</strong></span>
+          <span>Logged in as: <strong id="display-user">Friend</strong></span>
         </div>
         <button type="button" id="logout-btn" class="btn btn-outline-sm">
           <span>Sign Out</span> 🚪
@@ -135,7 +135,7 @@
       <!-- Revealing Diwali Message (Appears when cracked) -->
       <div class="revealed-greeting-box" id="revealed-greeting-box" style="display: none;">
         <div class="sparkle-stars">✨ 🌟 🎆 🌟 ✨</div>
-        <h1 class="diwali-headline" id="diwali-headline">Happy Diwali, Kubendhiran!</h1>
+        <h1 class="diwali-headline" id="diwali-headline">Happy Diwali!</h1>
         <p class="diwali-sub-blessing">
           May the supreme light of Deepavali eradicate all darkness, illuminating your journey with boundless joy, vibrant health, prosperity, and triumphant career success!
         </p>
