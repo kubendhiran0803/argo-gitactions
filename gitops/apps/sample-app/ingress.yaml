@@ -5,6 +5,7 @@ metadata:
   namespace: sample-app
   labels:
     app.kubernetes.io/name: sample-app
+    # inside i define the alb to redirect the traffic to the service. so already running the load balancer in my aws cluster. it finds the rule to forward the traffic to the service. so i need to define the ingress class name as alb and also define the annotations for alb.ingress.kubernetes.io/scheme, alb.ingress.kubernetes.io/target-type, alb.ingress.kubernetes.io/listen-ports
   annotations:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
