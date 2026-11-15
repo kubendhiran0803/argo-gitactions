@@ -42,6 +42,7 @@ resource "aws_eks_cluster" "this" {
     )
     endpoint_public_access  = true
     endpoint_private_access = true
+    public_access_cidrs     = var.cluster_endpoint_public_access_cidrs
   }
 
   access_config {
@@ -89,6 +90,11 @@ resource "aws_iam_role_policy_attachment" "node_group_registry" {
   role       = aws_iam_role.node_group.name
 }
 
+resource "aws_iam_role_policy_attachment" "node_group_ssm" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+  role       = aws_iam_role.node_group.name
+}
+
 # -----------------------------------------------------------------------------
 # EKS Managed Node Group
 # -----------------------------------------------------------------------------
@@ -96,7 +102,7 @@ resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
   node_group_name = "${var.cluster_name}-ng"
   node_role_arn   = aws_iam_role.node_group.arn
-  subnet_ids      = data.terraform_remote_state.base.outputs.private_subnet_ids
+  subnet_ids      = var.node_subnet_type == "public" ? data.terraform_remote_state.base.outputs.public_subnet_ids : data.terraform_remote_state.base.outputs.private_subnet_ids
 
   scaling_config {
     desired_size = var.desired_nodes
@@ -115,7 +121,8 @@ resource "aws_eks_node_group" "this" {
   depends_on = [
     aws_iam_role_policy_attachment.node_group_worker,
     aws_iam_role_policy_attachment.node_group_cni,
-    aws_iam_role_policy_attachment.node_group_registry
+    aws_iam_role_policy_attachment.node_group_registry,
+    aws_iam_role_policy_attachment.node_group_ssm
   ]
 }
 

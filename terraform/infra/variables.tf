@@ -88,3 +88,19 @@ variable "argocd_chart_version" {
   default     = "7.7.7"
 }
 
+variable "node_subnet_type" {
+  description = "Subnet type for EKS worker nodes: 'private' (default, uses NAT Gateway for egress) or 'public' (places nodes in public subnets with public IPs for direct communication)"
+  type        = string
+  default     = "private"
+  validation {
+    condition     = contains(["private", "public"], var.node_subnet_type)
+    error_message = "node_subnet_type must be either 'private' or 'public'."
+  }
+}
+
+variable "cluster_endpoint_public_access_cidrs" {
+  description = "List of CIDR blocks that can access the Amazon EKS public API server endpoint"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+

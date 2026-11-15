@@ -13,9 +13,10 @@ module "vpc" {
 module "security_group" {
   source = "./modules/SecurityGroup"
 
-  name        = "${local.cluster_name}-base-sg"
-  vpc_id      = module.vpc.vpc_id
-  environment = var.environment
-  tags        = local.common_tags
+  name                 = "${local.cluster_name}-base-sg"
+  vpc_id               = module.vpc.vpc_id
+  environment          = var.environment
+  public_ingress_cidrs = var.public_ingress_cidrs
+  tags                 = local.common_tags
 }
 

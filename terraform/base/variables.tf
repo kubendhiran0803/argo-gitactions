@@ -46,3 +46,9 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
+variable "public_ingress_cidrs" {
+  description = "CIDR blocks allowed for public HTTP and HTTPS ingress"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+

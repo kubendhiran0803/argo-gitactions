@@ -15,6 +15,12 @@ variable "environment" {
   default     = "staging"
 }
 
+variable "public_ingress_cidrs" {
+  description = "CIDR blocks allowed for public HTTP and HTTPS ingress"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 variable "tags" {
   description = "Tags to attach to the security group"
   type        = map(string)
