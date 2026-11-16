@@ -98,6 +98,12 @@ variable "node_subnet_type" {
   }
 }
 
+variable "ec2_ssh_key" {
+  description = "EC2 Key Pair name for SSH access to EKS worker nodes"
+  type        = string
+  default     = "sample"
+}
+
 variable "cluster_endpoint_public_access_cidrs" {
   description = "List of CIDR blocks that can access the Amazon EKS public API server endpoint"
   type        = list(string)

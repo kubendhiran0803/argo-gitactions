@@ -118,6 +118,10 @@ resource "aws_eks_node_group" "this" {
     max_unavailable = 1
   }
 
+  remote_access {
+    ec2_ssh_key = var.ec2_ssh_key
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.node_group_worker,
     aws_iam_role_policy_attachment.node_group_cni,
