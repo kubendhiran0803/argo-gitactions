@@ -15,6 +15,30 @@ configs:
   cm:
     timeout.reconciliation: 180s
     application.instanceLabelKey: argocd.argoproj.io/instance
+    url: http://localhost:8080
+    oidc.config: |
+      name: AWS
+      issuer: https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_74T3Gybvr
+      clientID: 57fdab624nge83ng8iq1h02u8r
+      clientSecret: $oidc.aws.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+      requestedIDTokenClaims:
+        cognito:groups:
+          essential: true
+  rbac:
+    policy.default: role:readonly
+    policy.matchMode: glob
+    scopes: '[cognito:groups, email]'
+    policy.csv: |
+      g, ArgoCD-Admins, role:admin
+      g, admin@example.com, role:admin
+      p, role:developer, applications, get, */*, allow
+      p, role:developer, applications, sync, */*, allow
+      p, role:developer, logs, get, */*, allow
+      g, ArgoCD-Developers, role:developer
 
 controller:
   resources:
@@ -55,6 +79,30 @@ argo-cd:
     cm:
       timeout.reconciliation: 180s
       application.instanceLabelKey: argocd.argoproj.io/instance
+      url: http://localhost:8080
+      oidc.config: |
+        name: AWS
+        issuer: https://cognito-idp.ap-south-1.amazonaws.com/ap-south-1_74T3Gybvr
+        clientID: 57fdab624nge83ng8iq1h02u8r
+        clientSecret: $oidc.aws.clientSecret
+        requestedScopes:
+          - openid
+          - profile
+          - email
+        requestedIDTokenClaims:
+          cognito:groups:
+            essential: true
+    rbac:
+      policy.default: role:readonly
+      policy.matchMode: glob
+      scopes: '[cognito:groups, email]'
+      policy.csv: |
+        g, ArgoCD-Admins, role:admin
+        g, admin@example.com, role:admin
+        p, role:developer, applications, get, */*, allow
+        p, role:developer, applications, sync, */*, allow
+        p, role:developer, logs, get, */*, allow
+        g, ArgoCD-Developers, role:developer
   dex:
     enabled: false
   notifications:

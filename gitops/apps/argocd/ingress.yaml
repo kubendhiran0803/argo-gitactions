@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server-ingress
+  namespace: argocd
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: subnet-0e8e972b8772496ab, subnet-045113a52d19215fa
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
+    # =========================================================================
+    # AWS IP RESTRICTION:
+    # Only allow your public IP (115.99.15.18/32).
+    # All other incoming traffic is dropped at the AWS ALB with HTTP 403 Forbidden!
+    # =========================================================================
+    alb.ingress.kubernetes.io/inbound-cidrs: "115.99.15.18/32"
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80

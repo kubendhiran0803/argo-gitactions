@@ -11,8 +11,6 @@ spec:
     repoURL: https://github.com/kubendhiran0803/argo-gitactions.git
     targetRevision: HEAD
     path: gitops/apps
-    directory:
-      recurse: true
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
@@ -22,4 +20,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-

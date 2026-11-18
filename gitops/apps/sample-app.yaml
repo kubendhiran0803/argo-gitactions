@@ -17,9 +17,6 @@ spec:
   syncPolicy:
     automated:
       prune: true
-      selfHeal: true # (If anyone modifies or deletes anything in the 
-      # cluster manually without committing to Git, reject their change and 
-      # recreate it immediately from Git!")
+      selfHeal: true
     syncOptions:
       - CreateNamespace=true
-

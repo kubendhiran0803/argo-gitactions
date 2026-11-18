@@ -24,7 +24,7 @@ spec:
         - name: region
           value: ap-south-1
         - name: vpcId
-          value: "vpc-08706cd58be2d1937"
+          value: "vpc-033021ada79fd22c0"
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
@@ -34,4 +34,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=false
-
